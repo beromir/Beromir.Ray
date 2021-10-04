@@ -1,0 +1,45 @@
+{
+    "description": "Debug your Neos site with the Ray app.",
+    "type": "neos-package",
+    "name": "beromir/neos-ray",
+    "keywords": [
+        "flow",
+        "neos",
+        "ray",
+        "debugging"
+    ],
+    "require": {
+        "neos/neos": "^7.0",
+        "neos/flow": "*",
+        "spatie/ray": "^1.30"
+    },
+    "config": {
+        "platform": {
+            "php": "^7.4"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Beromir\\Ray\\": "Classes/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Henrik Reißig",
+            "role": "Developer"
+        }
+    ],
+    "extra": {
+        "neos": {
+            "package-key": "Beromir.Ray"
+        }
+    },
+    "archive": {
+        "exclude": [
+            ".gitattributes",
+            ".github",
+            ".gitignore",
+            "LICENSE"
+        ]
+    }
+}
