@@ -2,6 +2,7 @@
     "description": "Debug your Neos site with the Ray app.",
     "type": "neos-package",
     "name": "beromir/neos-ray",
+    "license": "GPL-3.0",
     "keywords": [
         "flow",
         "neos",
