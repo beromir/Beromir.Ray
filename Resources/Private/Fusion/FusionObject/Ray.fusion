@@ -1,5 +1,5 @@
 prototype(Beromir.Ray:Ray) {
     @class = 'Beromir\\Ray\\FusionObjects\\Ray'
     debugAction = null
-    debugValues = null
+    debugValues = ${value}
 }
