@@ -4,10 +4,17 @@ namespace Beromir\Ray\FusionObjects;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Exception;
-use Neos\Fusion\FusionObjects\AbstractFusionObject;
+use Neos\Fusion\FusionObjects\AbstractArrayFusionObject;
 
-class Ray extends AbstractFusionObject
+class Ray extends AbstractArrayFusionObject
 {
+    /**
+     * If you iterate over "properties" these in here should usually be ignored.
+     * For example additional properties in "Case" that are not "Matchers".
+     *
+     * @var array
+     */
+    protected $ignoreProperties = ['__meta', 'debugAction', 'value'];
 
     /**
      * @return void
@@ -15,71 +22,97 @@ class Ray extends AbstractFusionObject
     public function evaluate(): void
     {
         $debugAction = strtolower($this->fusionValue('debugAction'));
-        $debugValues = $this->fusionValue('debugValues');
+        $debugValue = $this->fusionValue('value');
+
+        if (!empty($this->fusionValue('once'))) {
+            $this->debug(null, $debugAction);
+        } else {
+            if (!empty($debugValue)) {
+                if (is_array($debugValue) && is_object($debugValue[0]) && (get_class($debugValue[0]) === 'Neos\ContentRepository\Domain\Model\Node')) {
+                    foreach ($debugValue as $node) {
+                        try {
+                            $this->debug($node, $debugAction);
+                        } catch (Exception $e) {
+                            ray()->exception($e);
+                        }
+                    }
+                } else {
+                    $this->debug($debugValue, $debugAction);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param mixed $debugValue
+     * @param string $debugAction
+     *
+     * @return void
+     */
+    private function debug(mixed $debugValue = null, string $debugAction = ''): void
+    {
+        ray(function () use ($debugValue, $debugAction) {
+
+            $debug = ray();
+
+            if (!empty($debugValue) && !empty($debugAction)) {
+                if (is_object($debugValue) && (get_class($debugValue) === 'Neos\ContentRepository\Domain\Model\Node')) {
+                    $debug = ray($this->getNodeData($debugValue, $debugAction));
+                }
+            } elseif (!empty($debugValue)) {
+                $debug = ray($debugValue);
+            }
+
+            foreach (array_keys($this->properties) as $key) {
+                if (in_array($key, $this->ignoreProperties)) {
+                    continue;
+                }
+
+                $value = $this->fusionValue($key);
+
+                if (empty($value)) {
+                    $debug = $debug->$key();
+                } else {
+                    $debug = $debug->$key($value);
+                }
+            }
+            return $debug;
+        });
+    }
+
+    /**
+     * @param object $debugValue
+     * @param string $debugAction
+     *
+     * @return mixed
+     */
+    private function getNodeData(object $debugValue, string $debugAction): mixed
+    {
+        if (get_class($debugValue) !== 'Neos\ContentRepository\Domain\Model\Node') {
+            return null;
+        }
 
         switch ($debugAction) {
             case strtolower('nodeTypeName'):
-                $this->getNodeData($debugValues, 'getNodeTypeName');
-                break;
-            case strtolower('phpInfo'):
-                ray()->phpinfo();
-                break;
-            case strtolower('backtrace'):
-                ray()->backtrace();
-                break;
+                try {
+                    return $debugValue->getNodeTypeName();
+                } catch (Exception $e) {
+                    ray()->exception($e);
+                    return null;
+                }
             case strtolower('context'):
-                $this->getNodeData($debugValues, 'getContext');
-                break;
+                return $debugValue->getContext();
             case strtolower('contextPath'):
-                $this->getNodeData($debugValues, 'getContextPath');
-                break;
+                return $debugValue->getContextPath();
             case strtolower('properties'):
-                $this->getNodeData($debugValues, 'getProperties');
-                break;
+                try {
+                    return $debugValue->getProperties();
+                } catch (Exception $e) {
+                    ray()->exception($e);
+                    return null;
+                }
             default:
-                $this->debug($debugValues);
-        }
-    }
-
-    /**
-     * @param mixed $values
-     */
-    private function debug(mixed $values): void
-    {
-        if (!empty($values)) {
-            if (is_array($values) && (get_class($values[0]) === 'Neos\ContentRepository\Domain\Model\Node')) {
-                foreach ($values as $node) {
-                    try {
-                        ray($node);
-                    } catch (Exception $e) {
-                        ray($e);
-                    }
-                }
-            } else {
-                ray($values);
-            }
-        }
-    }
-
-    /**
-     * @param mixed $values
-     */
-    private function getNodeData(mixed $values, string $debugOption = 'properties'): void
-    {
-        if (!empty($values)) {
-            if (is_array($values)) {
-                foreach ($values as $value) {
-                    if (get_class($value) === 'Neos\ContentRepository\Domain\Model\Node') {
-                        try {
-                            ray($value->$debugOption());
-                        } catch (Exception $e) {
-                            ray($e);
-                        }
-                    }
-                }
-            } elseif (get_class($values) === 'Neos\ContentRepository\Domain\Model\Node') {
-                ray($values->$debugOption());
-            }
+                return null;
         }
     }
 }
