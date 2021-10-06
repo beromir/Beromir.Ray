@@ -70,7 +70,7 @@ renderer = afx`
 
 ```html
 renderer = afx`
-   <Beromir.Ray:Debug debugValues={node}/>
+   <Beromir.Ray:Debug value={node}/>
 `
 ```
 
