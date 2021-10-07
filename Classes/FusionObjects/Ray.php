@@ -24,6 +24,8 @@ class Ray extends AbstractArrayFusionObject
         $debugAction = strtolower($this->fusionValue('debugAction'));
         $debugValue = $this->fusionValue('value');
 
+        $debugValue = ($debugValue === null) ? 'ignore' : $debugValue;
+
         if (!empty($this->fusionValue('once'))) {
             $this->debug(null, $debugAction);
         } else {
