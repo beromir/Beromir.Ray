@@ -44,12 +44,12 @@ class Ray extends AbstractArrayFusionObject
     }
 
     /**
-     * @param mixed $debugValue
+     * @param $debugValue
      * @param string $debugAction
      *
      * @return void
      */
-    private function debug(mixed $debugValue = null, string $debugAction = ''): void
+    private function debug($debugValue = null, string $debugAction = ''): void
     {
         ray(function () use ($debugValue, $debugAction) {
 
@@ -81,12 +81,11 @@ class Ray extends AbstractArrayFusionObject
     }
 
     /**
-     * @param object $debugValue
+     * @param $debugValue
      * @param string $debugAction
      *
-     * @return mixed
      */
-    private function getNodeData(object $debugValue, string $debugAction): mixed
+    private function getNodeData($debugValue, string $debugAction)
     {
         if (get_class($debugValue) !== 'Neos\ContentRepository\Domain\Model\Node') {
             return null;
