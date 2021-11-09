@@ -7,6 +7,8 @@ prototype(Beromir.Ray:Debug) {
         mode = 'uncached'
         context {
             1 = 'node'
+            2 = 'site'
+            3 = 'documentNode'
         }
     }
 }

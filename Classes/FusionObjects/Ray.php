@@ -16,6 +16,8 @@ class Ray extends AbstractArrayFusionObject
      */
     protected $ignoreProperties = ['__meta', 'debugAction', 'value'];
 
+    protected $allowedDebugActions = ['nodetypename', 'context', 'contextpath', 'properties'];
+
     /**
      * @return void
      */
@@ -24,46 +26,25 @@ class Ray extends AbstractArrayFusionObject
         $debugAction = strtolower($this->fusionValue('debugAction'));
         $debugValue = $this->fusionValue('value');
 
-        $debugValue = ($debugValue === null) ? 'ignore' : $debugValue;
-
-        if (!empty($this->fusionValue('once'))) {
-            $this->debug(null, $debugAction);
+        if (is_string($debugAction) && in_array($debugAction, $this->allowedDebugActions)) {
+            $this->debugNodes($debugValue, $debugAction);
+        } elseif (is_string($debugAction) && !empty($debugAction)) {
+            ray()->once('The debug action is not known.');
         } else {
-            if (!empty($debugValue)) {
-                if (is_array($debugValue) && is_object($debugValue[0]) && (get_class($debugValue[0]) === 'Neos\ContentRepository\Domain\Model\Node')) {
-                    foreach ($debugValue as $node) {
-                        try {
-                            $this->debug($node, $debugAction);
-                        } catch (Exception $e) {
-                            ray()->exception($e);
-                        }
-                    }
-                } else {
-                    $this->debug($debugValue, $debugAction);
-                }
-            }
+            $this->debug($debugValue);
         }
     }
 
     /**
      * @param $debugValue
-     * @param string $debugAction
      *
      * @return void
      */
-    private function debug($debugValue = null, string $debugAction = ''): void
+    private function debug($debugValue): void
     {
-        ray(function () use ($debugValue, $debugAction) {
+        ray(function () use ($debugValue) {
 
-            $debug = ray();
-
-            if (!empty($debugValue) && !empty($debugAction)) {
-                if (is_object($debugValue) && (get_class($debugValue) === 'Neos\ContentRepository\Domain\Model\Node')) {
-                    $debug = ray($this->getNodeData($debugValue, $debugAction));
-                }
-            } elseif (!empty($debugValue)) {
-                $debug = ray($debugValue);
-            }
+            $debug = ray($debugValue);
 
             foreach (array_keys($this->properties) as $key) {
                 if (in_array($key, $this->ignoreProperties)) {
@@ -89,10 +70,6 @@ class Ray extends AbstractArrayFusionObject
      */
     private function getNodeData($debugValue, string $debugAction)
     {
-        if (get_class($debugValue) !== 'Neos\ContentRepository\Domain\Model\Node') {
-            return null;
-        }
-
         switch ($debugAction) {
             case strtolower('nodeTypeName'):
                 try {
@@ -114,6 +91,29 @@ class Ray extends AbstractArrayFusionObject
                 }
             default:
                 return null;
+        }
+    }
+
+    /**
+     * @param $debugValues
+     * @param string $debugAction
+     *
+     * @return void
+     */
+    private function debugNodes($debugValues, string $debugAction): void
+    {
+        if (is_array($debugValues)) {
+            $debugArray = [];
+
+            foreach ($debugValues as $debugValue) {
+                if (is_object($debugValue) && (get_class($debugValue) === 'Neos\ContentRepository\Domain\Model\Node')) {
+                    array_push($debugArray, $this->getNodeData($debugValue, $debugAction));
+                }
+            }
+
+            if (!empty($debugArray)) $this->debug($debugArray);
+        } elseif (is_object($debugValues) && (get_class($debugValues) === 'Neos\ContentRepository\Domain\Model\Node')) {
+            $this->debug($this->getNodeData($debugValues, $debugAction));
         }
     }
 }
