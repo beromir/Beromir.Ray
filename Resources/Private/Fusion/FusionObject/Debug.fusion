@@ -2,4 +2,11 @@ prototype(Beromir.Ray:Debug) {
     @class = 'Beromir\\Ray\\FusionObjects\\Ray'
     debugAction = ''
     value = ${value}
+
+    @cache {
+        mode = 'uncached'
+        context {
+            1 = 'node'
+        }
+    }
 }
