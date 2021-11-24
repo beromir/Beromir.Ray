@@ -132,5 +132,5 @@ You can also use the Ray Eel helper to debug your site.
 The second parameter can be used to set a debug action for NodeTypes.
 
 ```
-{Beromir.Ray.debug(node), 'properties'}
+{Beromir.Ray.debug(node, 'properties')}
 ```
