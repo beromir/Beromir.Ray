@@ -1,4 +1,7 @@
 Neos:
+  Fusion:
+    defaultContext:
+      Beromir.Ray: 'Beromir\Ray\EelHelper\RayHelper'
   Neos:
     fusion:
       autoInclude:
