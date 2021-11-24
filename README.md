@@ -119,3 +119,18 @@ You can use the following Debug Actions for NodeTypes:
 | `context` | Display the context of a node |
 | `contextPath` | Display the context path of a node |
 | `properties` | Display the properties of a node |
+
+### Eel Helper
+You can also use the Ray Eel helper to debug your site.
+
+```
+{Beromir.Ray.debug(node)}
+
+{Beromir.Ray.debug([node, site])}
+```
+
+The second parameter can be used to set a debug action for NodeTypes.
+
+```
+{Beromir.Ray.debug(node), 'properties'}
+```
